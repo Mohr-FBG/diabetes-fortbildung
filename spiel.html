@@ -62,7 +62,7 @@
   <section id="s-start">
     <div class="card">
       <h2>Ihre Aufgabe</h2>
-      <p>Sie übernehmen heute im Spätdienst die Betreuung von <b>Lena B., 19 Jahre</b>. Jede Runde entspricht einer Stunde. Pro Runde dürfen Sie genau <b>drei Aktionen</b> wählen – entscheiden Sie gemeinsam, was jetzt am wichtigsten ist.</p>
+      <p>Sie übernehmen heute im Spätdienst die Betreuung von <b>Lena B., 19 Jahre</b>. Jede Runde ist ein Zeitpunkt im Verlauf, bis Lena auf die Intensivstation verlegt wird. Pro Runde dürfen Sie genau <b>drei Aktionen</b> wählen – entscheiden Sie gemeinsam, was jetzt am wichtigsten ist.</p>
     </div>
     <div class="card">
       <h2>Rollen verteilen</h2>
@@ -136,99 +136,92 @@ const RUNDEN = [
   {
     code: "SONNE", zeit: "14:00 Uhr", titel: "Aufnahme",
     vital: () => [["Atmung", "28/min, tief", 1], ["Puls", "118/min", 1], ["Blutdruck", "105/65 mmHg", 0], ["Temperatur", "37,6 °C", 0], ["Bewusstsein", "wach, müde", 0], ["BZ", "nicht gemessen", 1]],
-    text: () => "Aufnahme mit der Einweisungsdiagnose „Gastroenteritis, Exsikkose“. Lena hat Typ-1-Diabetes, erbricht seit zwei Tagen und hat diffuse Bauchschmerzen. Haut und Schleimhäute sind trocken. Im Zimmer riecht es süßlich-fruchtig, ein bisschen wie Nagellackentferner.",
+    text: () => "Aufnahme mit der Einweisungsdiagnose „Gastroenteritis, Exsikkose“. Lena hat Typ-1-Diabetes und spritzt sich zu Hause selbst Insulin mit dem Pen. Sie erbricht seit zwei Tagen und hat diffuse Bauchschmerzen. Haut und Schleimhäute sind trocken. Eine Kollegin meint, im Zimmer rieche es „irgendwie fruchtig“ – Sie selbst riechen nichts.",
     zitat: "„Ich hab seit vorgestern kein Insulin gespritzt – ich hab ja nichts gegessen.“",
     aktionen: [
       ["tee", "Tee anbieten und ein Mittel gegen Übelkeit erfragen", 0, "Das behandelt nur die vermeintliche Gastroenteritis – die eigentliche Ursache bleibt unentdeckt."],
       ["bz", "Blutzucker messen", 10, "Bei Typ-1-Diabetes mit Erbrechen immer die erste Messung."],
-      ["vital", "Vitalzeichen und Bewusstsein engmaschig kontrollieren", 5, "Sinnvoll – aber ohne BZ und Arzt verschenken Sie Zeit."],
-      ["insulin", "Insulin nach Korrekturschema s. c. spritzen", -10, "Ohne ärztliche Anordnung gefährlich. Bei Exsikkose wirkt Insulin unter die Haut zudem unzuverlässig."],
-      ["keton", "Ketone im Blut messen", 10, "Tiefe Atmung, Übelkeit, Bauchschmerzen und Obstgeruch sind klassische Hinweise auf eine Ketoazidose."],
+      ["vital", "Vitalzeichen und Bewusstsein engmaschig kontrollieren", 5, "Sinnvoll – aber ohne BZ, Urintest und Arzt verschenken Sie Zeit."],
+      ["insulin", "Insulin nach Korrekturschema s. c. spritzen", -10, "Ohne ärztliche Anordnung gefährlich. Vor jeder Insulingabe bei Verdacht auf Ketoazidose muss das Kalium bekannt sein."],
+      ["urin", "Urin mit Teststreifen auf Ketone testen", 10, "Tiefe Atmung, Erbrechen und Bauchschmerzen bei Typ-1-Diabetes: Ketone im Urin prüfen. Auf den Geruch ist kein Verlass – nicht jeder kann ihn wahrnehmen."],
       ["bilanz", "Ein- und Ausfuhr bilanzieren", 5, "Wichtig für den Flüssigkeitshaushalt, aber jetzt nicht das Dringendste."],
-      ["arzt", "Arzt sofort informieren", 10, "Fehlendes Insulin plus tiefe, schnelle Atmung ist ein Notfall."],
+      ["arzt", "Arzt sofort informieren", 10, "Typ-1-Diabetes, kein Insulin seit zwei Tagen und tiefe, schnelle Atmung: ein Notfall."],
       ["ruhe", "Lena ruhen lassen, nächste Kontrolle zum Abendessen", -10, "Abwarten verschlechtert die Übersäuerung – Lena ist in Gefahr."],
     ],
     verpasst: {
       bz: "Ohne Blutzuckermessung fehlt der wichtigste Hinweis.",
-      keton: "Ohne Ketonmessung bleibt die Ketoazidose zunächst unentdeckt.",
+      urin: "Ohne Urintest bleibt der Verdacht auf eine Ketoazidose unbestätigt.",
       arzt: "Der Arzt erfährt erst spät von Lena – wertvolle Zeit geht verloren.",
     },
-    ereignis: () => "BZ 412 mg/dl, Ketone 4,6 mmol/l. Die Blutgasanalyse zeigt pH 7,18 und Bikarbonat 10 mmol/l: mittelschwere diabetische Ketoazidose. Der Arzt ordnet an: Infusion NaCl 0,9 %, Insulin-Perfusor 6 IE/h über einen eigenen Zugang, Kalium-Kontrollen und Monitorüberwachung. Ein IMC-Bett wird ab ca. 20 Uhr frei.",
+    ereignis: () => "BZ 412 mg/dl, Urin-Teststreifen: Ketone +++ (stark positiv). Der Arzt bestätigt mit einer venösen Blutgasanalyse (pH 7,18) eine diabetische Ketoazidose und meldet Lena auf der Intensivstation an. Das Bett ist in etwa einer Stunde frei. Bis dahin ordnet er an: venöser Zugang, Infusion NaCl 0,9 % 1000 ml über eine Stunde, Blutentnahme mit Kalium, Vitalzeichen alle 15 Minuten.",
   },
   {
-    code: "MOND", zeit: "15:00 Uhr", titel: "Der Perfusor läuft",
-    vital: () => [["BZ", "412 → 368 mg/dl", 1], ["Atmung", "26/min", 1], ["Puls", "112/min", 1], ["Blutdruck", "110/70 mmHg", 0], ["Bewusstsein", "wach, müde", 0], ["Ausfuhr", "1× erbrochen, Urin 350 ml", 0]],
-    text: () => "Seit 14:45 läuft der Insulin-Perfusor mit 6 IE/h über einen eigenen Zugang am linken Arm. Die Infusion NaCl 0,9 % läuft.",
-    zitat: "„Muss dieses Ding die ganze Zeit dranbleiben? Ich hab den Arm schon die ganze Zeit angewinkelt.“",
+    code: "MOND", zeit: "14:30 Uhr", titel: "Bis die Intensivstation bereit ist",
+    vital: () => [["BZ (14:05)", "412 mg/dl", 1], ["Urin-Ketone", "+++", 1], ["Atmung", "26/min", 1], ["Puls", "116/min", 1], ["Blutdruck", "100/60 mmHg", 0], ["Bewusstsein", "wach, müde", 0]],
+    text: () => "Der Arzt hat die Akutmaßnahmen angeordnet (siehe Runde 1). Lena hat noch keinen venösen Zugang. In ihrem Nachtschrank liegt ihr eigener Insulinpen.",
+    zitat: "„Mir ist so schlecht … kann ich nicht einfach etwas trinken?“",
     aktionen: [
-      ["kalium", "Kalium-Kontrolle zeitgerecht sicherstellen", 10, "Insulin treibt Kalium in die Zellen – der Wert kann schnell fallen."],
-      ["essen", "Lena etwas zu essen bringen", 0, "Bei Übelkeit kaum möglich. Zucker bekommt Lena später als Infusion."],
-      ["bz", "Blutzucker stündlich messen", 10, "Der BZ soll langsam sinken – nur stündliche Werte zeigen, ob das gelingt."],
-      ["pause", "Perfusor pausieren, der BZ sinkt ja schon", -10, "Insulin muss weiterlaufen, bis die Ketone abgebaut sind."],
-      ["vital", "Vitalzeichen und Bewusstsein überwachen", 5, "Richtig und wichtig, deckt das aktuelle Problem aber nicht auf."],
-      ["perfusor", "Perfusor, Laufrate und Leitung kontrollieren", 10, "Gut entdeckt: Die Leitung war unter dem angewinkelten Arm abgeknickt. Sie lagern den Arm, der Perfusor läuft wieder."],
-      ["sc", "Zusätzlich Insulin s. c. nach Schema geben", -10, "Doppelte Insulingabe – Gefahr von Hypoglykämie und Kaliummangel."],
-      ["bilanz", "Bilanz fortführen", 5, "Wichtig, um den Flüssigkeitsersatz zu steuern."],
+      ["trinken", "Lena viel Wasser trinken lassen", 0, "Bei Erbrechen bleibt kaum etwas drin – die Flüssigkeit muss über die Vene."],
+      ["zugang", "Zugang legen (lassen) und Infusion nach Anordnung anhängen", 10, "Flüssigkeit ist die wichtigste erste Maßnahme – Lena ist stark ausgetrocknet."],
+      ["insulin", "Lena ihr eigenes Insulin aus dem Nachtschrank spritzen lassen", -10, "Insulin nur nach ärztlicher Anordnung – vorher muss das Kalium bekannt sein."],
+      ["blut", "Blutentnahme mit Kalium vorbereiten und sofort ins Labor", 10, "Der Kaliumwert entscheidet, wann der Arzt Insulin geben kann."],
+      ["toilette", "Lena allein zur Toilette gehen lassen", -5, "Der Kreislauf ist instabil – Sturzgefahr."],
+      ["vital15", "Vitalzeichen und Bewusstsein alle 15 Minuten kontrollieren", 10, "Lena kann sich schnell verschlechtern – engmaschig dranbleiben."],
+      ["bz", "Blutzucker erneut messen", 5, "Sinnvoll – stündlich reicht aber zunächst."],
+      ["bilanz", "Ausfuhr erfassen (Erbrechen, Urin)", 5, "Wichtig für die Übergabe an die Intensivstation."],
     ],
     verpasst: {
-      perfusor: "15:45 Uhr: Okklusionsalarm! Die Leitung war abgeknickt – Lena hat 40 Minuten kaum Insulin bekommen.",
-      bz: "Ohne stündliche BZ-Werte lässt sich nicht beurteilen, ob die Therapie wirkt.",
-      kalium: "Die Kalium-Kontrolle wäre fast untergegangen – die Kollegin denkt in letzter Minute daran.",
+      zugang: "Die Infusion startet erst 30 Minuten später – Lena trocknet weiter aus.",
+      blut: "Das Kalium fehlt – der Arzt kann das Insulin noch nicht anordnen.",
+      vital15: "Eine Verschlechterung würde zu spät auffallen.",
     },
-    ereignis: () => "16:00 Uhr: BZ 296 mg/dl. Das Kalium-Ergebnis kommt um 16:30 Uhr.",
+    ereignis: () => "15:00 Uhr: Kalium 4,8 mmol/l. Der Arzt gibt eine erste Insulindosis und dokumentiert Uhrzeit und Menge. Die Intensivstation meldet: Das Bett verzögert sich um etwa 45 Minuten.",
   },
   {
-    code: "STERN", zeit: "17:00 Uhr", titel: "Kalium fällt",
-    vital: () => [["BZ", "296 → 232 mg/dl", 0], ["Kalium (16:30)", "3,2 mmol/l", 1], ["Ketone", "2,9 mmol/l", 1], ["Atmung", "22/min", 0], ["Puls", "98/min", 0], ["Monitor", "vereinzelte Extrasystolen", 1]],
-    text: () => "Bei Aufnahme lag das Kalium noch bei 4,8 mmol/l. Insulin-Perfusor und Infusion laufen.",
-    zitat: "„Meine Beine sind so schwer und kribbeln. Ich muss mal zur Toilette.“",
+    code: "STERN", zeit: "15:15 Uhr", titel: "Die Verlegung verzögert sich",
+    vital: () => [["Bewusstsein", "schläfrig, antwortet langsam", 1], ["Blutdruck", "92/55 mmHg", 1], ["Puls", "124/min", 1], ["Atmung", "26/min", 1], ["Letzter BZ", "412 mg/dl (14:05)", 0], ["Infusion", "1. Liter fast durch", 0]],
+    text: () => "Lena ist in den letzten 15 Minuten deutlich schläfriger geworden. Sie hat noch einmal erbrochen und liegt flach auf dem Rücken.",
+    zitat: "„Lasst mich einfach schlafen …“",
     aktionen: [
-      ["kaliumselbst", "Kalium-Infusion selbstständig anhängen", -10, "Kalium nur auf ärztliche Anordnung und mit genauer Laufrate – zu schnell gegeben ist es lebensgefährlich."],
-      ["arzt", "Arzt sofort über Kalium 3,2 informieren", 10, "Kaliummangel kann gefährliche Herzrhythmusstörungen auslösen."],
-      ["allein", "Lena allein zur Toilette gehen lassen", -5, "Die Schwäche in den Beinen kommt vom Kaliummangel – Sturzgefahr!"],
-      ["glukose", "Glukose-Infusion nach Anordnung vorbereiten", 10, "Der BZ liegt unter 250 mg/dl: Glukose kommt dazu, damit das Insulin weiterlaufen kann."],
-      ["bz", "Blutzucker weiter stündlich messen", 5, "Richtig, löst aber das akute Problem nicht."],
-      ["stopp", "Insulin-Perfusor stoppen, der BZ ist ja fast normal", -10, "Insulin baut die Ketone ab und muss weiterlaufen. Gegen den BZ-Abfall hilft Glukose, nicht das Abstellen."],
-      ["monitor", "Monitorüberwachung sicherstellen und beobachten", 10, "Die Extrasystolen passen zum sinkenden Kalium – gut im Blick behalten."],
-      ["begleiten", "Zur Toilette begleiten oder Steckbecken anbieten", 5, "Gut – die Muskelschwäche erhöht die Sturzgefahr."],
+      ["cola", "Etwas Cola gegen die Übelkeit geben", -10, "Schläfrig und erbrechend: Aspirationsgefahr! Zucker ist hier außerdem nicht das Problem."],
+      ["arzt", "Arzt sofort informieren", 10, "Zunehmende Schläfrigkeit und sinkender Blutdruck – Lena verschlechtert sich."],
+      ["angeh", "Angehörige informieren", 0, "Kann später erfolgen – jetzt geht es um Lena selbst."],
+      ["bz", "Blutzucker sofort messen", 10, "Bei jeder Bewusstseinsveränderung zuerst den BZ prüfen – nach der Insulingabe auch eine Hypoglykämie ausschließen."],
+      ["schlaf", "Lena schlafen lassen, sie ist erschöpft", -10, "Die Schläfrigkeit ist ein Alarmzeichen, keine Erschöpfung."],
+      ["seite", "Aspirationsschutz: Oberkörper hoch oder Seitenlage, Absaugung bereit", 10, "Schläfrig und erbricht – so schützen Sie die Atemwege."],
+      ["infus", "Infusion prüfen, nächste Infusion nach Anordnung bereithalten", 5, "Gut – der Flüssigkeitsbedarf ist hoch."],
+      ["vital", "Vitalzeichen weiter alle 15 Minuten", 5, "Richtig, aber jetzt braucht es mehr als Beobachten."],
     ],
     verpasst: {
-      arzt: "18:00 Uhr: Kalium 2,8 mmol/l, auf dem Monitor häufen sich die Extrasystolen. Jetzt wird es eng.",
-      glukose: "Ohne Glukose sinkt der BZ unter dem Insulin immer weiter …",
-      monitor: "Die zunehmenden Extrasystolen fallen erst spät auf.",
+      arzt: "Der Arzt erfährt erst bei der nächsten Visite von der Verschlechterung.",
+      bz: "Unklar bleibt, ob der BZ nach der Insulingabe zu schnell gefallen ist.",
+      seite: "Lena erbricht im Liegen – Aspirationsgefahr!",
     },
-    ereignis: () => "18:00 Uhr: Ketone 2,1 mmol/l – die Übersäuerung bessert sich langsam.",
+    ereignis: () => "BZ 318 mg/dl – keine Hypoglykämie. Der Arzt kommt sofort, lässt die Infusion schneller laufen und bittet das Intensiv-Team, Lena direkt abzuholen.",
   },
   {
-    code: "KOMET", zeit: "19:00 Uhr", titel: "Lena wird schläfrig",
-    vital: (s) => [["Bewusstsein", "schläfrig, verlangsamt", 1], ["Atmung", "18/min", 0], ["Puls", "92/min", 0], ["Blutdruck", "118/72 mmHg", 0], ["Letzter BZ (18:00)", hatteGlukose(s) ? "171 mg/dl" : "118 mg/dl", 0], ["IMC-Bett", "frei ab 20 Uhr", 0]],
-    text: () => "Lena klagt über Kopfschmerzen und antwortet nur noch langsam. Perfusor und Infusionen laufen.",
-    zitat: "„Mir ist so komisch … ich will nur schlafen.“",
+    code: "KOMET", zeit: "15:45 Uhr", titel: "Übergabe an die Intensivstation",
+    vital: () => [["Bewusstsein", "schläfrig, erweckbar", 1], ["Blutdruck", "104/62 mmHg", 0], ["Puls", "112/min", 0], ["Atmung", "24/min", 0], ["BZ (15:15)", "318 mg/dl", 0], ["Urin-Ketone", "+++", 1]],
+    text: () => "Das Intensiv-Team ist da und übernimmt Lena gleich. Sie haben zwei Minuten für die Übergabe.",
+    zitat: "„Wo bringt ihr mich hin?“",
     aktionen: [
-      ["imc", "Übergabe an die IMC strukturiert vorbereiten", 5, "Hilfreich – die Verlegung steht an."],
-      ["schmerz", "Schmerzmittel geben und schlafen lassen", -10, "Das verschleiert ein Warnzeichen."],
-      ["arzt", "Arzt sofort informieren", 10, "Eine neue Bewusstseinsveränderung unter Therapie ist immer ein Alarmzeichen."],
-      ["angeh", "Angehörige anrufen", 0, "Kann später erfolgen – jetzt geht es um Lena selbst."],
-      ["bz", "Blutzucker sofort messen", 10, "Erst eine Hypoglykämie ausschließen – die häufigste behebbare Ursache."],
-      ["licht", "Licht aus, Ruhe, nächste Kontrolle in zwei Stunden", -10, "Eine Verschlechterung bliebe unbemerkt."],
-      ["neuro", "Bewusstsein und Pupillen engmaschig kontrollieren", 10, "Veränderungen früh erkennen und dokumentieren."],
-      ["laufrate", "Infusionen und Perfusor kontrollieren", 5, "Sinnvoll, um Fehler bei der Laufrate auszuschließen."],
+      ["kurz", "Nur „Ketoazidose“ sagen – der Rest steht in der Akte", -10, "In der Akte sucht jetzt niemand. Wichtige Informationen gehen verloren."],
+      ["uebergabe", "Strukturiert übergeben: Was ist los, was ist wichtig, was wurde getan", 10, "Die vier Fragen aus Block 1 geben auch der Übergabe eine feste Reihenfolge."],
+      ["geruch", "Erwähnen, dass Sie keinen Azetongeruch bemerkt haben", -10, "Den Geruch nimmt nicht jeder wahr – er sagt nichts aus. Entscheidend sind BZ, Urin-Ketone und Blutgas."],
+      ["insulinzeit", "Uhrzeit und Dosis der ersten Insulingabe nennen", 10, "Die Intensivstation muss wissen, wie viel Insulin wann gegeben wurde."],
+      ["erklaeren", "Lena kurz erklären, was jetzt passiert", 5, "Sie ist 19 und verunsichert – ein Satz hilft."],
+      ["bilanz", "Bilanz übergeben: Infusionsmenge, Erbrechen, Urin", 10, "Wichtig für den weiteren Flüssigkeitsersatz."],
+      ["pen", "Lenas Insulinpen mitgeben, damit sie selbst weiterspritzen kann", -5, "Auf der Intensivstation wird das Insulin gesteuert gegeben – Selbstspritzen ist jetzt nicht vorgesehen."],
+      ["angeh", "Angehörige über die Verlegung informieren (lassen)", 5, "Gut – Lenas Familie weiß noch nichts."],
     ],
     verpasst: {
-      bz: "Ohne BZ-Messung bleibt unklar, ob eine Hypoglykämie dahintersteckt.",
-      arzt: "Der Arzt erfährt erst bei der Verlegung von Lenas Zustand.",
-      neuro: "Ohne neurologische Kontrollen fällt eine weitere Verschlechterung spät auf.",
+      uebergabe: "Die Übergabe bleibt lückenhaft – das Intensiv-Team muss vieles erfragen.",
+      insulinzeit: "Unklar, wann Lena Insulin bekommen hat – Gefahr einer doppelten Gabe.",
+      bilanz: "Die Intensivstation weiß nicht, wie viel Flüssigkeit Lena schon bekommen hat.",
     },
-    ereignis: (s) => hatteGlukose(s)
-      ? "BZ jetzt 164 mg/dl – keine Hypoglykämie. Der Arzt untersucht Lena sofort, verlangsamt die Infusion und lässt sie umgehend auf die IMC verlegen. Bei jungen Menschen kann unter der Therapie sehr selten ein Hirnödem entstehen – Kopfschmerz und Schläfrigkeit sind Warnzeichen."
-      : "BZ jetzt 58 mg/dl – Hypoglykämie! Ohne Glukose-Infusion hat das Insulin den Blutzucker zu weit gesenkt. Nach Glukose auf ärztliche Anordnung wird Lena wieder wacher und wird auf die IMC verlegt.",
+    ereignis: () => "Das Intensiv-Team übernimmt Lena. Dort geht die Therapie mit Insulin-Perfusor und Ketonmessung im Blut weiter. Zwei Tage später kommt Lena stabil auf Ihre Station zurück – mit einem Termin bei der Diabetesberatung: Insulin nie ganz weglassen, auch wenn man nichts isst.",
   },
 ];
-
-function hatteGlukose(s) {
-  const r3 = s.wahl[2];
-  return !r3 || r3.includes("glukose"); // Runde 3 übersprungen: neutral annehmen
-}
 
 // ---------- Zustand ----------
 const SPEICHER = "station4-spiel";

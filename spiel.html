@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spätdienst auf Station 4</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .hidden { display: none !important; }
+  .btn {
+    display: block; width: 100%; border: 0; border-radius: 10px;
+    padding: 14px 16px; font: inherit; font-weight: 700; cursor: pointer;
+    background: var(--accent); color: #fff; margin-top: 12px;
+  }
+  @media (prefers-color-scheme: dark) { .btn { color: #0b1a1b; } }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  input.code, input.name {
+    width: 100%; font: inherit; font-size: 20px; padding: 12px 14px;
+    border: 2px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink);
+  }
+  input.code { text-transform: uppercase; letter-spacing: .15em; text-align: center; font-weight: 700; }
+  .fehler { color: var(--warn); font-weight: 600; margin-top: 8px; min-height: 1.5em; }
+  .punkte { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--muted); }
+  .punkte b { color: var(--accent); font-size: 18px; }
+  .vital { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .vital div { background: var(--bg); border-radius: 8px; padding: 8px 10px; }
+  .vital small { display: block; color: var(--muted); font-size: 12px; }
+  .vital strong { font-size: 17px; }
+  .vital .auff strong { color: var(--warn); }
+  .aktion {
+    display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left;
+    background: var(--card); border: 2px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; margin: 8px 0; font: inherit; color: var(--ink); cursor: pointer;
+  }
+  .aktion .box {
+    flex: none; width: 24px; height: 24px; border-radius: 6px; border: 2px solid var(--line);
+    display: grid; place-items: center; font-weight: 700; color: #fff; margin-top: 1px;
+  }
+  .aktion.gewaehlt { border-color: var(--accent); background: var(--accent-soft); }
+  .aktion.gewaehlt .box { background: var(--accent); border-color: var(--accent); }
+  .zaehler { text-align: center; font-weight: 700; color: var(--accent); margin-top: 6px; }
+  .fb { border-radius: 10px; padding: 10px 12px; margin: 8px 0; background: var(--bg); }
+  .fb .pt { float: right; font-weight: 700; margin-left: 10px; }
+  .fb.plus .pt { color: #2e9e6b; }
+  .fb.minus { background: var(--warn-soft); }
+  .fb.minus .pt { color: var(--warn); }
+  .fb b { display: block; }
+  .ereignis { border: 2px solid var(--warn); }
+  .ereignis h2 { color: var(--warn); }
+  .rollen li { margin: 6px 0; }
+  .gross { font-size: 44px; font-weight: 800; color: var(--accent); text-align: center; margin: 4px 0; }
+</style>
+</head>
+<body>
+<header class="akte"><div class="inner">
+  <small id="kopfzeile">Planspiel · Station 4</small>
+  <h1 id="kopftitel">Spätdienst auf Station 4</h1>
+</div></header>
+<main>
+
+  <!-- Start -->
+  <section id="s-start">
+    <div class="card">
+      <h2>Ihre Aufgabe</h2>
+      <p>Sie übernehmen heute im Spätdienst die Betreuung von <b>Lena B., 19 Jahre</b>. Jede Runde entspricht einer Stunde. Pro Runde dürfen Sie genau <b>drei Aktionen</b> wählen – entscheiden Sie gemeinsam, was jetzt am wichtigsten ist.</p>
+    </div>
+    <div class="card">
+      <h2>Rollen verteilen</h2>
+      <ul class="rollen">
+        <li><b>Bezugspflege</b> – ist gedanklich bei Lena und beobachtet.</li>
+        <li><b>Arztkontakt</b> – formuliert die Meldungen an den Arzt.</li>
+        <li><b>Dokumentation</b> – hält Werte und Entscheidungen fest.</li>
+        <li><b>Teamleitung</b> – moderiert und bedient das Handy.</li>
+        <li><i>Bei 5 Personen:</i> <b>Beobachtung</b> – gibt am Ende Rückmeldung zur Zusammenarbeit.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Ihr Gruppenname</h2>
+      <input class="name" id="gruppe" maxlength="24" placeholder="z. B. Team Insulin" autocomplete="off">
+      <button class="btn" id="b-start">Weiter</button>
+    </div>
+  </section>
+
+  <!-- Code -->
+  <section id="s-code" class="hidden">
+    <div class="card punkte"><span id="c-gruppe"></span><span>Punkte: <b id="c-punkte">0</b></span></div>
+    <div class="card">
+      <h2 id="c-titel">Warten auf Runde 1</h2>
+      <p>Geben Sie den Code ein, den die Kursleitung auf der Folie zeigt.</p>
+      <input class="code" id="code" maxlength="10" autocomplete="off" autocapitalize="characters">
+      <div class="fehler" id="c-fehler"></div>
+      <button class="btn" id="b-code">Runde starten</button>
+    </div>
+  </section>
+
+  <!-- Runde -->
+  <section id="s-runde" class="hidden">
+    <div class="card punkte"><span id="r-runde"></span><span>Punkte: <b id="r-punkte">0</b></span></div>
+    <div class="card"><h2>Lagebild</h2><div class="vital" id="r-vital"></div><p id="r-text" style="margin-bottom:0"></p></div>
+    <div class="card bericht"><h2>Lena sagt</h2><p class="zitat" id="r-zitat" style="margin:0"></p></div>
+    <div class="card auftrag"><h2>Ihre Entscheidung</h2><p style="margin:0">Wählen Sie genau <b>drei</b> Aktionen.</p></div>
+    <div id="r-aktionen"></div>
+    <div class="zaehler" id="r-zaehler">0 von 3 gewählt</div>
+    <button class="btn" id="b-bestaetigen" disabled>Entscheidung bestätigen</button>
+  </section>
+
+  <!-- Ergebnis -->
+  <section id="s-ergebnis" class="hidden">
+    <div class="card punkte"><span id="e-runde"></span><span>Gesamt: <b id="e-punkte">0</b></span></div>
+    <div class="card ereignis"><h2 id="e-zeit">Was passiert</h2><p id="e-text" style="margin:0"></p></div>
+    <div class="card"><h2>Ihre Aktionen · <span id="e-rundenpunkte"></span></h2><div id="e-fb"></div></div>
+    <div class="card hidden" id="e-verpasst-card"><h2>Verpasst</h2><div id="e-verpasst"></div></div>
+    <button class="btn" id="b-weiter">Weiter</button>
+  </section>
+
+  <!-- Ende -->
+  <section id="s-ende" class="hidden">
+    <div class="card" style="text-align:center">
+      <h2>Schichtende</h2>
+      <p id="x-gruppe" style="margin:0"></p>
+      <div class="gross" id="x-punkte">0</div>
+      <p style="margin:0;color:var(--muted)">von 120 möglichen Punkten</p>
+    </div>
+    <div class="card"><h2>Das lief gut</h2><div id="x-gut"></div></div>
+    <div class="card hidden" id="x-verpasst-card"><h2>Daran denken wir nächstes Mal</h2><div id="x-verpasst"></div></div>
+    <p class="hinweis">Nennen Sie Ihre Punktzahl bei der Siegerehrung.</p>
+    <a class="zurueck" href="spiel.html?neu">Neues Spiel starten</a>
+  </section>
+
+  <p class="hinweis">Fiktiver Fall · ausschließlich für Fortbildungszwecke</p>
+</main>
+
+<script>
+// pts: +10 Schlüssel, +5 hilfreich, 0 neutral, -5/-10 schädlich
+const RUNDEN = [
+  {
+    code: "SONNE", zeit: "14:00 Uhr", titel: "Aufnahme",
+    vital: () => [["Atmung", "28/min, tief", 1], ["Puls", "118/min", 1], ["Blutdruck", "105/65 mmHg", 0], ["Temperatur", "37,6 °C", 0], ["Bewusstsein", "wach, müde", 0], ["BZ", "nicht gemessen", 1]],
+    text: () => "Aufnahme mit der Einweisungsdiagnose „Gastroenteritis, Exsikkose“. Lena hat Typ-1-Diabetes, erbricht seit zwei Tagen und hat diffuse Bauchschmerzen. Haut und Schleimhäute sind trocken. Im Zimmer riecht es süßlich-fruchtig, ein bisschen wie Nagellackentferner.",
+    zitat: "„Ich hab seit vorgestern kein Insulin gespritzt – ich hab ja nichts gegessen.“",
+    aktionen: [
+      ["tee", "Tee anbieten und ein Mittel gegen Übelkeit erfragen", 0, "Das behandelt nur die vermeintliche Gastroenteritis – die eigentliche Ursache bleibt unentdeckt."],
+      ["bz", "Blutzucker messen", 10, "Bei Typ-1-Diabetes mit Erbrechen immer die erste Messung."],
+      ["vital", "Vitalzeichen und Bewusstsein engmaschig kontrollieren", 5, "Sinnvoll – aber ohne BZ und Arzt verschenken Sie Zeit."],
+      ["insulin", "Insulin nach Korrekturschema s. c. spritzen", -10, "Ohne ärztliche Anordnung gefährlich. Bei Exsikkose wirkt Insulin unter die Haut zudem unzuverlässig."],
+      ["keton", "Ketone im Blut messen", 10, "Tiefe Atmung, Übelkeit, Bauchschmerzen und Obstgeruch sind klassische Hinweise auf eine Ketoazidose."],
+      ["bilanz", "Ein- und Ausfuhr bilanzieren", 5, "Wichtig für den Flüssigkeitshaushalt, aber jetzt nicht das Dringendste."],
+      ["arzt", "Arzt sofort informieren", 10, "Fehlendes Insulin plus tiefe, schnelle Atmung ist ein Notfall."],
+      ["ruhe", "Lena ruhen lassen, nächste Kontrolle zum Abendessen", -10, "Abwarten verschlechtert die Übersäuerung – Lena ist in Gefahr."],
+    ],
+    verpasst: {
+      bz: "Ohne Blutzuckermessung fehlt der wichtigste Hinweis.",
+      keton: "Ohne Ketonmessung bleibt die Ketoazidose zunächst unentdeckt.",
+      arzt: "Der Arzt erfährt erst spät von Lena – wertvolle Zeit geht verloren.",
+    },
+    ereignis: () => "BZ 412 mg/dl, Ketone 4,6 mmol/l. Die Blutgasanalyse zeigt pH 7,18 und Bikarbonat 10 mmol/l: mittelschwere diabetische Ketoazidose. Der Arzt ordnet an: Infusion NaCl 0,9 %, Insulin-Perfusor 6 IE/h über einen eigenen Zugang, Kalium-Kontrollen und Monitorüberwachung. Ein IMC-Bett wird ab ca. 20 Uhr frei.",
+  },
+  {
+    code: "MOND", zeit: "15:00 Uhr", titel: "Der Perfusor läuft",
+    vital: () => [["BZ", "412 → 368 mg/dl", 1], ["Atmung", "26/min", 1], ["Puls", "112/min", 1], ["Blutdruck", "110/70 mmHg", 0], ["Bewusstsein", "wach, müde", 0], ["Ausfuhr", "1× erbrochen, Urin 350 ml", 0]],
+    text: () => "Seit 14:45 läuft der Insulin-Perfusor mit 6 IE/h über einen eigenen Zugang am linken Arm. Die Infusion NaCl 0,9 % läuft.",
+    zitat: "„Muss dieses Ding die ganze Zeit dranbleiben? Ich hab den Arm schon die ganze Zeit angewinkelt.“",
+    aktionen: [
+      ["kalium", "Kalium-Kontrolle zeitgerecht sicherstellen", 10, "Insulin treibt Kalium in die Zellen – der Wert kann schnell fallen."],
+      ["essen", "Lena etwas zu essen bringen", 0, "Bei Übelkeit kaum möglich. Zucker bekommt Lena später als Infusion."],
+      ["bz", "Blutzucker stündlich messen", 10, "Der BZ soll langsam sinken – nur stündliche Werte zeigen, ob das gelingt."],
+      ["pause", "Perfusor pausieren, der BZ sinkt ja schon", -10, "Insulin muss weiterlaufen, bis die Ketone abgebaut sind."],
+      ["vital", "Vitalzeichen und Bewusstsein überwachen", 5, "Richtig und wichtig, deckt das aktuelle Problem aber nicht auf."],
+      ["perfusor", "Perfusor, Laufrate und Leitung kontrollieren", 10, "Gut entdeckt: Die Leitung war unter dem angewinkelten Arm abgeknickt. Sie lagern den Arm, der Perfusor läuft wieder."],
+      ["sc", "Zusätzlich Insulin s. c. nach Schema geben", -10, "Doppelte Insulingabe – Gefahr von Hypoglykämie und Kaliummangel."],
+      ["bilanz", "Bilanz fortführen", 5, "Wichtig, um den Flüssigkeitsersatz zu steuern."],
+    ],
+    verpasst: {
+      perfusor: "15:45 Uhr: Okklusionsalarm! Die Leitung war abgeknickt – Lena hat 40 Minuten kaum Insulin bekommen.",
+      bz: "Ohne stündliche BZ-Werte lässt sich nicht beurteilen, ob die Therapie wirkt.",
+      kalium: "Die Kalium-Kontrolle wäre fast untergegangen – die Kollegin denkt in letzter Minute daran.",
+    },
+    ereignis: () => "16:00 Uhr: BZ 296 mg/dl. Das Kalium-Ergebnis kommt um 16:30 Uhr.",
+  },
+  {
+    code: "STERN", zeit: "17:00 Uhr", titel: "Kalium fällt",
+    vital: () => [["BZ", "296 → 232 mg/dl", 0], ["Kalium (16:30)", "3,2 mmol/l", 1], ["Ketone", "2,9 mmol/l", 1], ["Atmung", "22/min", 0], ["Puls", "98/min", 0], ["Monitor", "vereinzelte Extrasystolen", 1]],
+    text: () => "Bei Aufnahme lag das Kalium noch bei 4,8 mmol/l. Insulin-Perfusor und Infusion laufen.",
+    zitat: "„Meine Beine sind so schwer und kribbeln. Ich muss mal zur Toilette.“",
+    aktionen: [
+      ["kaliumselbst", "Kalium-Infusion selbstständig anhängen", -10, "Kalium nur auf ärztliche Anordnung und mit genauer Laufrate – zu schnell gegeben ist es lebensgefährlich."],
+      ["arzt", "Arzt sofort über Kalium 3,2 informieren", 10, "Kaliummangel kann gefährliche Herzrhythmusstörungen auslösen."],
+      ["allein", "Lena allein zur Toilette gehen lassen", -5, "Die Schwäche in den Beinen kommt vom Kaliummangel – Sturzgefahr!"],
+      ["glukose", "Glukose-Infusion nach Anordnung vorbereiten", 10, "Der BZ liegt unter 250 mg/dl: Glukose kommt dazu, damit das Insulin weiterlaufen kann."],
+      ["bz", "Blutzucker weiter stündlich messen", 5, "Richtig, löst aber das akute Problem nicht."],
+      ["stopp", "Insulin-Perfusor stoppen, der BZ ist ja fast normal", -10, "Insulin baut die Ketone ab und muss weiterlaufen. Gegen den BZ-Abfall hilft Glukose, nicht das Abstellen."],
+      ["monitor", "Monitorüberwachung sicherstellen und beobachten", 10, "Die Extrasystolen passen zum sinkenden Kalium – gut im Blick behalten."],
+      ["begleiten", "Zur Toilette begleiten oder Steckbecken anbieten", 5, "Gut – die Muskelschwäche erhöht die Sturzgefahr."],
+    ],
+    verpasst: {
+      arzt: "18:00 Uhr: Kalium 2,8 mmol/l, auf dem Monitor häufen sich die Extrasystolen. Jetzt wird es eng.",
+      glukose: "Ohne Glukose sinkt der BZ unter dem Insulin immer weiter …",
+      monitor: "Die zunehmenden Extrasystolen fallen erst spät auf.",
+    },
+    ereignis: () => "18:00 Uhr: Ketone 2,1 mmol/l – die Übersäuerung bessert sich langsam.",
+  },
+  {
+    code: "KOMET", zeit: "19:00 Uhr", titel: "Lena wird schläfrig",
+    vital: (s) => [["Bewusstsein", "schläfrig, verlangsamt", 1], ["Atmung", "18/min", 0], ["Puls", "92/min", 0], ["Blutdruck", "118/72 mmHg", 0], ["Letzter BZ (18:00)", hatteGlukose(s) ? "171 mg/dl" : "118 mg/dl", 0], ["IMC-Bett", "frei ab 20 Uhr", 0]],
+    text: () => "Lena klagt über Kopfschmerzen und antwortet nur noch langsam. Perfusor und Infusionen laufen.",
+    zitat: "„Mir ist so komisch … ich will nur schlafen.“",
+    aktionen: [
+      ["imc", "Übergabe an die IMC strukturiert vorbereiten", 5, "Hilfreich – die Verlegung steht an."],
+      ["schmerz", "Schmerzmittel geben und schlafen lassen", -10, "Das verschleiert ein Warnzeichen."],
+      ["arzt", "Arzt sofort informieren", 10, "Eine neue Bewusstseinsveränderung unter Therapie ist immer ein Alarmzeichen."],
+      ["angeh", "Angehörige anrufen", 0, "Kann später erfolgen – jetzt geht es um Lena selbst."],
+      ["bz", "Blutzucker sofort messen", 10, "Erst eine Hypoglykämie ausschließen – die häufigste behebbare Ursache."],
+      ["licht", "Licht aus, Ruhe, nächste Kontrolle in zwei Stunden", -10, "Eine Verschlechterung bliebe unbemerkt."],
+      ["neuro", "Bewusstsein und Pupillen engmaschig kontrollieren", 10, "Veränderungen früh erkennen und dokumentieren."],
+      ["laufrate", "Infusionen und Perfusor kontrollieren", 5, "Sinnvoll, um Fehler bei der Laufrate auszuschließen."],
+    ],
+    verpasst: {
+      bz: "Ohne BZ-Messung bleibt unklar, ob eine Hypoglykämie dahintersteckt.",
+      arzt: "Der Arzt erfährt erst bei der Verlegung von Lenas Zustand.",
+      neuro: "Ohne neurologische Kontrollen fällt eine weitere Verschlechterung spät auf.",
+    },
+    ereignis: (s) => hatteGlukose(s)
+      ? "BZ jetzt 164 mg/dl – keine Hypoglykämie. Der Arzt untersucht Lena sofort, verlangsamt die Infusion und lässt sie umgehend auf die IMC verlegen. Bei jungen Menschen kann unter der Therapie sehr selten ein Hirnödem entstehen – Kopfschmerz und Schläfrigkeit sind Warnzeichen."
+      : "BZ jetzt 58 mg/dl – Hypoglykämie! Ohne Glukose-Infusion hat das Insulin den Blutzucker zu weit gesenkt. Nach Glukose auf ärztliche Anordnung wird Lena wieder wacher und wird auf die IMC verlegt.",
+  },
+];
+
+function hatteGlukose(s) {
+  const r3 = s.wahl[2];
+  return !r3 || r3.includes("glukose"); // Runde 3 übersprungen: neutral annehmen
+}
+
+// ---------- Zustand ----------
+const SPEICHER = "station4-spiel";
+let s = { gruppe: "", runde: 0, punkte: 0, wahl: [], phase: "start" };
+try { const g = JSON.parse(localStorage.getItem(SPEICHER)); if (g && g.phase) s = g; } catch (e) {}
+function sichern() { try { localStorage.setItem(SPEICHER, JSON.stringify(s)); } catch (e) {} }
+
+const $ = (id) => document.getElementById(id);
+function zeige(id) {
+  for (const sec of ["s-start", "s-code", "s-runde", "s-ergebnis", "s-ende"]) $(sec).classList.toggle("hidden", sec !== id);
+  window.scrollTo(0, 0);
+}
+function esc(t) { const d = document.createElement("div"); d.textContent = t; return d.innerHTML; }
+function vz(p) { return p > 0 ? "+" + p : String(p); }
+
+// ---------- Start ----------
+$("b-start").onclick = () => {
+  s.gruppe = $("gruppe").value.trim() || "Unsere Gruppe";
+  s.phase = "code"; sichern(); render();
+};
+
+// ---------- Code ----------
+$("b-code").onclick = () => {
+  const c = $("code").value.trim().toUpperCase();
+  const idx = RUNDEN.findIndex(r => r.code === c);
+  if (idx < 0) { $("c-fehler").textContent = "Dieser Code passt nicht. Bitte prüfen."; return; }
+  if (idx < s.runde) { $("c-fehler").textContent = "Diese Runde haben Sie schon gespielt."; return; }
+  $("c-fehler").textContent = ""; $("code").value = "";
+  s.runde = idx; s.auswahl = []; s.phase = "runde"; sichern(); render();
+};
+$("code").addEventListener("keydown", e => { if (e.key === "Enter") $("b-code").click(); });
+
+// ---------- Runde ----------
+function renderRunde() {
+  const r = RUNDEN[s.runde];
+  $("kopfzeile").textContent = `Runde ${s.runde + 1} von 4 · ${r.zeit}`;
+  $("kopftitel").textContent = r.titel;
+  $("r-runde").textContent = s.gruppe;
+  $("r-punkte").textContent = s.punkte;
+  $("r-vital").innerHTML = r.vital(s).map(([k, v, a]) => `<div class="${a ? "auff" : ""}"><small>${esc(k)}</small><strong>${esc(v)}</strong></div>`).join("");
+  $("r-text").textContent = r.text(s);
+  $("r-zitat").textContent = r.zitat;
+  const box = $("r-aktionen"); box.innerHTML = "";
+  s.auswahl = s.auswahl || [];
+  r.aktionen.forEach(([id, txt]) => {
+    const b = document.createElement("button");
+    b.className = "aktion" + (s.auswahl.includes(id) ? " gewaehlt" : "");
+    b.innerHTML = `<span class="box">${s.auswahl.includes(id) ? "✓" : ""}</span><span>${esc(txt)}</span>`;
+    b.onclick = () => {
+      if (s.auswahl.includes(id)) s.auswahl = s.auswahl.filter(x => x !== id);
+      else if (s.auswahl.length < 3) s.auswahl.push(id);
+      sichern(); renderRunde();
+    };
+    box.appendChild(b);
+  });
+  $("r-zaehler").textContent = `${s.auswahl.length} von 3 gewählt`;
+  $("b-bestaetigen").disabled = s.auswahl.length !== 3;
+}
+$("b-bestaetigen").onclick = () => {
+  if (s.auswahl.length !== 3) return;
+  if (!confirm("Entscheidung endgültig abgeben?")) return;
+  const r = RUNDEN[s.runde];
+  const pts = r.aktionen.filter(a => s.auswahl.includes(a[0])).reduce((x, a) => x + a[2], 0);
+  s.wahl[s.runde] = s.auswahl.slice();
+  s.rundenpunkte = s.rundenpunkte || [];
+  s.rundenpunkte[s.runde] = pts;
+  s.punkte = s.rundenpunkte.reduce((x, p) => x + (p || 0), 0);
+  s.phase = "ergebnis"; sichern(); render();
+};
+
+// ---------- Ergebnis ----------
+function renderErgebnis() {
+  const r = RUNDEN[s.runde], w = s.wahl[s.runde] || [];
+  $("kopfzeile").textContent = `Runde ${s.runde + 1} von 4 · Ergebnis`;
+  $("kopftitel").textContent = r.titel;
+  $("e-runde").textContent = s.gruppe;
+  $("e-punkte").textContent = s.punkte;
+  $("e-zeit").textContent = "Was passiert";
+  $("e-text").textContent = r.ereignis(s);
+  $("e-rundenpunkte").textContent = vz(s.rundenpunkte[s.runde]) + " Punkte";
+  $("e-fb").innerHTML = r.aktionen.filter(a => w.includes(a[0])).map(([, txt, p, fb]) =>
+    `<div class="fb ${p > 0 ? "plus" : p < 0 ? "minus" : ""}"><span class="pt">${vz(p)}</span><b>${esc(txt)}</b>${esc(fb)}</div>`).join("");
+  const miss = Object.entries(r.verpasst).filter(([id]) => !w.includes(id));
+  $("e-verpasst-card").classList.toggle("hidden", miss.length === 0);
+  $("e-verpasst").innerHTML = miss.map(([id, t]) => {
+    const a = r.aktionen.find(x => x[0] === id);
+    return `<div class="fb minus"><b>${esc(a[1])}</b>${esc(t)}</div>`;
+  }).join("");
+  $("b-weiter").textContent = s.runde < 3 ? "Weiter zur nächsten Runde" : "Zum Schichtende";
+}
+$("b-weiter").onclick = () => {
+  if (s.runde < 3) { s.runde += 1; s.phase = "code"; } else { s.phase = "ende"; }
+  s.auswahl = []; sichern(); render();
+};
+
+// ---------- Ende ----------
+function renderEnde() {
+  $("kopfzeile").textContent = "Planspiel · Station 4";
+  $("kopftitel").textContent = "Schichtende";
+  $("x-gruppe").textContent = s.gruppe;
+  $("x-punkte").textContent = s.punkte;
+  const gut = [], verpasst = [];
+  RUNDEN.forEach((r, i) => {
+    const w = s.wahl[i]; if (!w) return;
+    for (const id of Object.keys(r.verpasst)) {
+      const t = `${r.zeit}: ${r.aktionen.find(a => a[0] === id)[1]}`;
+      (w.includes(id) ? gut : verpasst).push(t);
+    }
+  });
+  const liste = (arr) => arr.length ? `<ul class="med">${arr.map(t => `<li>${esc(t)}</li>`).join("")}</ul>` : "<p style='margin:0'>–</p>";
+  $("x-gut").innerHTML = liste(gut);
+  $("x-verpasst-card").classList.toggle("hidden", verpasst.length === 0);
+  $("x-verpasst").innerHTML = liste(verpasst);
+}
+
+// ---------- Anzeige ----------
+function render() {
+  if (s.phase === "start") { zeige("s-start"); return; }
+  if (s.phase === "code") {
+    $("kopfzeile").textContent = "Planspiel · Station 4";
+    $("kopftitel").textContent = "Spätdienst auf Station 4";
+    $("c-gruppe").textContent = s.gruppe;
+    $("c-punkte").textContent = s.punkte;
+    $("c-titel").textContent = `Warten auf Runde ${s.runde + 1}`;
+    zeige("s-code"); return;
+  }
+  if (s.phase === "runde") { renderRunde(); zeige("s-runde"); return; }
+  if (s.phase === "ergebnis") { renderErgebnis(); zeige("s-ergebnis"); return; }
+  renderEnde(); zeige("s-ende");
+}
+// Neustart über ?neu
+if (location.search.includes("neu")) { s = { gruppe: "", runde: 0, punkte: 0, wahl: [], phase: "start" }; sichern(); history.replaceState(null, "", location.pathname); }
+render();
+</script>
+</body>
+</html>
